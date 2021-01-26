@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>QNA2</title>
+    <script src="/js/jquery-3.1.1.min.js"></script>
+    <script src="/js/vue.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        * {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+
+        p {
+            margin: 0px;
+        }
+
+        body {
+            margin: 0;
+            background: #ffffff;
+        }
+
+        #main {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: 0;
+        }
+
+        #topbar {
+            background: #03c;
+            color: #ffffff;
+            height: 30px;
+            font-size: 20px;
+        }
+
+        #talkbox {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: #ffffff;
+            border: thin solid #cccccc;
+            overflow-y: auto;
+        }
+
+        .talkbox-layout1 {
+            right: 0;
+            bottom: 210px;
+        }
+
+        .talkbox-layout2 {
+            bottom: 0;
+            right: 210px;
+        }
+
+        #resize-bar {
+            position: absolute;
+            background-color: #03c;
+            border: none;
+        }
+
+        .resize-bar-layout1 {
+            bottom: 200px;
+            height: 10px;
+            left: 0;
+            right: 0;
+            cursor: ns-resize;
+        }
+
+        .resize-bar-layout2 {
+            top: 0;
+            right: 200px;
+            bottom: 0;
+            width: 10px;
+            cursor: ew-resize;
+        }
+
+        #inputbox {
+            position: absolute;
+            box-sizing: border-box;
+            border: thin solid #cccccc;
+            bottom: 0;
+            overflow: auto;
+        }
+
+        .inputbox-layout1 {
+            left: 0;
+            height: 200px;
+            right: 0;
+        }
+
+        .inputbox-layout2 {
+            right: 0;
+            width: 200px;
+            top: 0;
+        }
+
+        .itembox {
+            margin-top: 5px;
+            position: relative
+        }
+
+        .messagebox {
+            border-radius: 5px;
+            border: thin solid #cccccc;
+            padding: 5px;
+            width: 100%;
+            background-color: #f4f4f4;
+            overflow: hidden;
+        }
+
+        .messagebox2 {
+            border-radius: 5px;
+            border: thin solid #cccccc;
+            padding: 5px;
+            width: 100%;
+            background: #0099FF;
+            color: #ffffff;
+        }
+
+        .fromaimessagebox {
+            float: left;
+            display: flex;
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        .fromhumanmessagebox {
+            float: right;
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+        }
+
+        .cb {
+            clear: both
+        }
+
+        .iconimagebox {
+            width: 60px;
+            height: 60px;
+            vertical-align: top;
+        }
+
+        .iconimage {
+            width: 60px;
+            height: 60px;
+            border: thin solid #000000;
+            border-radius: 30px;
+        }
+
+        .wordwrap {
+            white-space: pre-wrap;
+            /* CSS3 */
+        }
+
+        .leftpane {
+            position: absolute;
+            top: 30px;
+            left: 0;
+            bottom: 0;
+            right: 0;
+        }
+
+        .rightpane {
+            position: absolute;
+            right: 0;
+            top: 30px;
+            bottom: 0;
+            width: 300px;
+            box-sizing: border-box;
+            background-color: #ffffff;
+        }
+
+        .contentbox {
+            max-height: 150px;
+            overflow: hidden;
+        }
+
+        @media (max-width: 600px) {
+            .rightpane {
+                width: 33.3%;
+            }
+        }
+
+        @media (min-width: 600px) {}
+    </style>
+    <script>
+        var global = {};
+        global.ainame = "";
+        global.aigreet = "";
+        global.aiimage = "";
+        global.needconfirm = "";
+        global.ctrlDown = false;
+        global.enterDown = false;
+        global.updateid = 0;
+        global.ckeditorcontentdominit = false;
+        $(document).ready(function () {
+            $.ajaxSetup({ cache: false });
+        });
+
+        function createMessage(content, from) {
+            content = formatOutput(content);
+            var html =
+                "<div class=\"itembox\">" +
+                " <div class=\"fromaimessagebox\">" +
+                "  <table style=\"width:100%;\">" +
+                "   <tr>" +
+                "    <td>" +
+                "     <div style=\"margin-bottom:5px\">" +
+                "      <image class=\"iconimage\" src=\"/image/ai.jpg\" />" +
+                "     </div>" +
+                "     <div class=\"messagebox wordwrap\">" + content + "</div>" +
+                "    </td>" +
+                "   </tr>" +
+                "  </table>" +
+                " </div>" +
+                " <div class=\"cb\">" +
+                " </div>" +
+                "</div>";
+            var html2 =
+                "<div class=\"itembox\">" +
+                " <div class=\"fromhumanmessagebox\">" +
+                "  <table style=\"width:100%;\">" +
+                "   <tr>" +
+                "    <td>" +
+                "     <div style=\"margin-bottom:5px;display:flex;justify-content:flex-end;\">" +
+                "      <image class=\"iconimage\" src=\"/image/user.jpg\" />" +
+                "     </div>" +
+                "     <div class=\"messagebox2 wordwrap\">" + content + "</div>" +
+                "    </td>" +
+                "   </tr>" +
+                "  </table>" +
+                " </div>" +
+                " <div class=\"cb\"></div>" +
+                "</div>";
+            if (from == "l") {
+                $("#talkbox").append(html);
+            }
+            else {
+                $("#talkbox").append(html2);
+            }
+
+            $('#talkbox').scrollTop($('#talkbox')[0].scrollHeight);
+        }
+
+        function prepareSendContent() {
+            var data = $("#textarea1").val();
+            $("#textarea1").val("");
+            var html =
+                "<div class=\"message-item\">" +
+                " <div class=\"contentbox\">" + data + "</div>" +
+                " <div><a href=\"javascript:void(0)\" onclick=\"toggle(this)\"><span>展开/收起</span></a></div>" +
+                "</div>";
+            createMessage(html, 'r');
+            var odata = data;
+            data = formatData(data);
+            var ret = testInsert(data);
+            if (ret > 0) {
+                switch (ret) {
+                    case 1:
+                        odata = odata.replace(/-rem\s/, "");
+                        insertContent(odata);
+                        break;
+                    case 2:
+                        odata = odata.replace(/-cls\s/, "");
+                        odata = odata.replace(/-cls&nbsp;/, "");
+                        $("#talkbox").html("");
+                        break;
+                    case 3:
+                        odata = odata.replace(/-upd\s/, "");
+                        odata = odata.replace(/-upd&nbsp;/, "");
+                        updateContent(odata);
+                        break;
+                    case 4:
+                        odata = odata.replace(/-tl\s/, "");
+                        translateContent(odata);
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+            else {
+                checkDuplicate(data);
+            }
+        }
+
+        function testInsert(data) {
+            var p = /-rem.*?/;
+            if (p.test(data)) {
+                return 1;
+            }
+
+            p = /-cls.*?/;
+            if (p.test(data)) {
+                return 2;
+            }
+
+            p = /-upd.*?/;
+            if (p.test(data)) {
+                return 3;
+            }
+
+            p = /-tl.*?/;
+            if (p.test(data)) {
+                return 4;
+            }
+        }
+
+        function formatData(data) {
+            //data = data.replace(/<.*?>/g, "");
+            return data
+        }
+
+        function checkDuplicate(data) {
+            $.ajax({
+                url: "/checkduplicate",
+                method: "post",
+                data: JSON.stringify({
+                    content: data
+                }),
+                success: function (data) {
+                    if (data.length == 0) {
+                        createMessage("没有任何发现", 'l');
+                        return;
+                    }
+
+                    var html = "";
+                    var totalscore = 0;
+                    for (var i = 0; i < data.length; i++) {
+                        totalscore += data[i].score;
+                    }
+
+                    var avgscore = totalscore / data.length;
+                    for (var i = 0; i < data.length; i++) {
+                        var id = data[i].id;
+                        var createtime = data[i].createtime;
+                        var content = data[i].content;
+                        var score = data[i].score;
+                        var count = i + 1;
+                        var writeContent = "";
+                        var text =
+                            "<div class=\"message-item\" style=\"margin-bottom:3px;\">" +
+                            " <div class=\"contentbox\">" +
+                            "  <span class=\"content-text\" name=\"contenttext" + id + "\">" + content + "</span>" +
+                            " </div><br/><br/>" +
+                            " <a href=\"javascript:void(0)\" onclick=\"reenterContent(" + id + ")\">编辑</a> " +
+                            " <a href=\"javascript:void(0)\" onclick=\"deleteContent(" + id + ")\">删除</a> " +
+                            " <a href=\"javascript:void(0)\" onclick=\"showAllContent(this)\">显示全部</a> " +
+                            " <a href=\"javascript:void(0)\" onclick=\"toggle(this)\">展开/收起</a> " +
+                            " <a href=\"javascript:void(0)\" onclick=\"copy(this)\">拷贝</a>" +
+                            "</div>";
+                        if (i == 0) {
+                            if (data.length > 1) {
+                                writeContent = text;
+                            }
+                            else {
+                                writeContent = text.replace("<a href=\"javascript:void(0)\" onclick=\"showAllContent(this)\">显示全部</a>", "");
+                            }
+                        }
+                        if (i != 0) {
+                            writeContent = text.replace("<div class=\"message-item\" style=\"margin-bottom:3px;\">", "<div class=\"message-item\" style=\"margin-bottom:3px;display:none\">");
+                            writeContent = writeContent.replace("<a href=\"javascript:void(0)\" onclick=\"showAllContent(this)\">显示全部</a>", "");
+                        }
+
+                        html = html + writeContent;
+                    }
+                    createMessage(html, 'l');
+                },
+                error: function (error) {
+                },
+                complete: function () {
+                },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json"
+            });
+        }
+
+        function showAllContent(obj) {
+            $(obj).parents(".messagebox").find("div").show();
+        }
+
+        function toggle(obj) {
+            if ($(obj).parents(".message-item").find(".contentbox").css("maxHeight") != "none") {
+                $(obj).parents(".message-item").find(".contentbox").css("maxHeight", "unset");
+            }
+            else {
+                $(obj).parents(".message-item").find(".contentbox").css("maxHeight", "150px");
+            }
+        }
+
+        function copy(obj) {
+            var copyText = $(obj).parents(".message-item").find(".content-text").text();
+            $("#hidden-input-text").val(copyText);
+            $("#hidden-input-text")[0].select();
+            document.execCommand("copy");
+        }
+
+        function insertContent(data) {
+            data = checkinput(data);
+            $.ajax({
+                url: "/remembercontent",
+                method: "post",
+                data: JSON.stringify({
+                    content: data
+                }),
+                success: function (data) {
+                    if (data.length == 0) {
+                        createMessage("收到", 'l');
+                        return;
+                    }
+
+                    createMessage("收到", 'l');
+                },
+                error: function (error) {
+                },
+                complete: function () {
+                },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json"
+            });
+        }
+
+        function translateContent(data) {
+            data = checkinput(data);
+            $.ajax({
+                url: "/TranslateWord",
+                method: "post",
+                data: JSON.stringify({
+                    content: data
+                }),
+                success: function (data) {
+                    let word = '';
+                    if (data && data.translation && data.translation.length) {
+                        word = data.translation[0];
+                    }
+
+                    createMessage(word, 'l');
+                },
+                error: function (error) {
+                },
+                complete: function () {
+                },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json"
+            });
+        }
+
+        function reenterContent(id) {
+            global.updateid = id;
+            var content = $($("span[name='contenttext{0}']".format(id))[0]).text();
+            $("#textarea1").val("-upd " + content);
+        }
+
+        function deleteContent(id) {
+            $.ajax({
+                url: "/deletecontent",
+                method: "post",
+                data: JSON.stringify({
+                    id: id
+                }),
+                success: function (data) {
+                    if (data.length == 0) {
+                        createMessage("收到", 'l');
+                        return;
+                    }
+
+                    createMessage("收到", 'l');
+                },
+                error: function (error) {
+                },
+                complete: function () {
+                },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json"
+            });
+        }
+
+        function updateContent(data) {
+            id = global.updateid;
+            var content = checkinput(data);
+            $.ajax({
+                url: "/updatecontent",
+                method: "post",
+                data: JSON.stringify({
+                    id: id,
+                    content: content
+                }),
+                success: function (data) {
+                    $.each($("span[name='contenttext{0}']".format(id)), function (a, b) {
+                        $(b).text(content);
+                    });
+                    if (data.length == 0) {
+                        createMessage("收到", 'l');
+                        return;
+                    }
+
+                    createMessage("收到", 'l');
+                },
+                error: function (error) {
+                },
+                complete: function () {
+                },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json"
+            });
+        }
+
+        function checkinput(data) {
+            data = data.replace(/</g, "&lt;");
+            data = data.replace(/>/g, "&gt;");
+            return data;
+        }
+
+        function formatOutput(data) {
+            // data = data.replace(/&lt;/g, "<");
+            // data = data.replace(/&gt;/g, ">");
+            data = parserHyperLink(data);
+            return data;
+        }
+
+        function parserHyperLink(data) {
+            data = data.replace(/(https?:\/\/(www\.)?[-a-zA-Z0-9@@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@@:%_\+.~#!?&//=;\(\)]*))/g, '<a href="$1" target="_blank">$1</a>');
+            return data;
+        }
+
+        if (!String.prototype.format) {
+            String.prototype.format = function () {
+                var args = arguments;
+                return this.replace(/{(\d+)}/g, function (match, number) {
+                    return typeof args[number] != 'undefined'
+                        ? args[number]
+                        : match
+                        ;
+                });
+            };
+        }
+    </script>
+</head>
+
+<body>
+    <div id="main">
+        <div
+            style="position: fixed; top: 0; left: 0; width: 100%; height: 30px; display: flex; align-items: center; padding-left: 4px; background-color: #03c; color: #ffffff;">
+            <span style="flex: 1 1 auto">Welcome to QNA2</span>
+            <div style="flex: 0 0 auto; width: 100px; display: flex; align-items: center; justify-content: center;">
+                <a href="javascript:void(0)" onclick="switchLayout()"><span
+                        style="color: #ffffff;">switchLayout</span></a>
+            </div>
+        </div>
+        <div class="leftpane">
+            <div id="talkbox" class="talkbox-layout1"></div>
+            <div id="resize-bar" class="resize-bar-layout1"></div>
+            <div id="inputbox" class="inputbox-layout1">
+                <textarea id="textarea1"
+                    style="width: 100%; border: none; position: absolute; top: 0; left: 0; bottom: 60px;"
+                    v-on:keyup.ctrl.enter="prepareSendContent()"></textarea>
+                <div style="position: absolute; bottom: 0px; right: 0px; left: 0px; height: 60px;">
+                    <button style="width: 100%; height: 60px; cursor: pointer" id="submitbutton"
+                        v-on:click="prepareSendContent()">提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <textarea style="position: absolute; top: -10000px; right: -10000px" id="hidden-input-text"></textarea>
+    <script>
+        var main = new Vue({
+            el: "#main",
+            data: {
+            },
+            methods: {
+                prepareSendContent: prepareSendContent
+            }
+        });
+        let startResize = false;
+        let startPozX = 0;
+        let startPozY = 0;
+        let layout = 1;
+        function switchLayout() {
+
+
+
+
+            if (layout == 1) {
+                layout = 2;
+                $("#talkbox").css("right", '310px');
+                $("#resize-bar").css("right", '300px');
+                $("#inputbox").css("width", '300px');
+                $("#talkbox").css("bottom", '0');
+                $("#resize-bar").css("bottom", '0');
+                $("#inputbox").css("height", '100%');
+
+                $("#resize-bar").removeClass("resize-bar-layout1")
+                $("#resize-bar").addClass("resize-bar-layout2")
+                $("#talkbox").removeClass("talkbox-layout1")
+                $("#talkbox").addClass("talkbox-layout2")
+                $("#inputbox").removeClass("inputbox-layout1")
+                $("#inputbox").addClass("inputbox-layout2")
+            }
+            else {
+                layout = 1;
+                $("#talkbox").css("right", '0');
+                $("#resize-bar").css("right", '0');
+                $("#inputbox").css("width", '100%');
+                $("#talkbox").css("bottom", '310px');
+                $("#resize-bar").css("bottom", '300px');
+                $("#inputbox").css("height", '300px');
+
+                $("#resize-bar").removeClass("resize-bar-layout2")
+                $("#resize-bar").addClass("resize-bar-layout1")
+                $("#talkbox").removeClass("talkbox-layout2")
+                $("#talkbox").addClass("talkbox-layout1")
+                $("#inputbox").removeClass("inputbox-layout2")
+                $("#inputbox").addClass("inputbox-layout1")
+            }
+        }
+
+        $(document).ready(function () {
+            $("#resize-bar").bind("touchstart mousedown", function (e) {
+                startResize = true;
+                if (layout == 1) {
+                    startPozY = e.clientY;
+                }
+                else {
+                    startPozX = e.clientX;
+                }
+            });
+
+            $(document).bind("touchend mouseup", function (e) {
+                startResize = false;
+                if (layout == 1) {
+                    startPozY = e.clientY;
+                }
+                else {
+                    startPozX = e.clientX;
+                }
+            });
+
+            $(document).bind("touchmove mousemove", function (e) {
+                if (startResize) {
+                    if (layout == 1) {
+                        let currentPozY = 0;
+                        if (e.touches) {
+                            currentPozY = e.touches[0].clientY;
+                        }
+                        else {
+                            currentPozY = e.clientY;
+                        }
+
+                        $("#talkbox").css("bottom", window.innerHeight - currentPozY + 10);
+                        $("#resize-bar").css("bottom", window.innerHeight - currentPozY);
+                        $("#inputbox").css("height", window.innerHeight - currentPozY);
+                    }
+                    else {
+                        let currentPozX = 0;
+                        if (e.touches) {
+                            currentPozX = e.touches[0].clientX;
+                        }
+                        else {
+                            currentPozX = e.clientX;
+                        }
+
+                        $("#talkbox").css("right", window.innerWidth - currentPozX + 10);
+                        $("#resize-bar").css("right", window.innerWidth - currentPozX);
+                        $("#inputbox").css("width", window.innerWidth - currentPozX);
+                    }
+                }
+            });
+        });
+        $(document)
+    </script>
+</body>
+</html>
