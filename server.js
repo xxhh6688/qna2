@@ -8,7 +8,7 @@ const app = express();
 
 app.use(cors());
 app.use(cookieParser());
-app.use(express.static('/'));
+app.use(express.static('static'));
 
 // parse requests of content-type - application/json
 app.use(bodyParser.json());
