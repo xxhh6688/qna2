@@ -1,4 +1,4 @@
-const sql = require("./db.js");
+const query = require("./db.js");
 
 const Answer = function () {
 
@@ -10,7 +10,7 @@ Answer.checkDuplicate = (content, result) => {
     let sqlStr = `SELECT id, content, MATCH(answer_search) AGAINST('${searchStr}') AS score FROM answer WHERE MATCH(answer_search) AGAINST('${searchStr}')`;
 
     try {
-        sql.query(sqlStr, (err, res) => {
+        query(sqlStr, (err, res) => {
             if (err) {
                 console.log("error: ", err);
                 result(err, null);
@@ -33,7 +33,7 @@ Answer.rememberContent = (content, result) => {
     let sqlStr = `insert into answer (content,answer_search,createtime) values ('${content}', '${searchStr}',UNIX_TIMESTAMP())`;
 
     try {
-        sql.query(sqlStr, (err, res) => {
+        query(sqlStr, (err, res) => {
             if (err) {
                 console.log("error: ", err);
                 result(err, null);
@@ -56,7 +56,7 @@ Answer.updateContent = (id, content, result) => {
     let sqlStr = `update answer set content='${content}', answer_search='${searchStr}' where id=${id}`;
 
     try {
-        sql.query(sqlStr, (err, res) => {
+        query(sqlStr, (err, res) => {
             if (err) {
                 console.log("error: ", err);
                 result(err, null);
@@ -75,7 +75,7 @@ Answer.deleteContent = (id, result) => {
     let sqlStr = `delete from answer where id=${id}`;
 
     try {
-        sql.query(sqlStr, (err, res) => {
+        query(sqlStr, (err, res) => {
             if (err) {
                 console.log("error: ", err);
                 result(err, null);
