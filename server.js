@@ -8,6 +8,8 @@ const app = express();
 
 app.use(cors());
 app.use(cookieParser());
+app.use(express.static('js'));
+app.use(express.static('image'));
 
 // parse requests of content-type - application/json
 app.use(bodyParser.json());
@@ -21,55 +23,6 @@ require("./router.js")(app);
 app.get("/", (req, res) => {
     res.writeHead(200, {'Content-Type':'text/html'})
     fs.readFile('index.html',function(error, data){
-        if(error){
-            res.writeHead(404);
-            res.write('page not found');
-        }
-        else {
-            res.write(data);
-        }
-
-        res.end();
-    });
-});
-
-app.get("/*?.css", (req, res) => {
-    res.writeHead(200, {'Content-Type':'text/css'})
-    let file=__dirname + req.url;
-    fs.readFile(file,function(error, data){
-        if(error){
-            res.writeHead(404);
-            res.write('page not found');
-        }
-        else {
-            res.write(data);
-        }
-
-        res.end();
-    });
-
-});
-
-app.get("/*?.js", (req, res) => {
-    res.writeHead(200, {'Content-Type':'application/javascript'})
-    let file=__dirname + req.url;
-    fs.readFile(file,function(error, data){
-        if(error){
-            res.writeHead(404);
-            res.write('page not found');
-        }
-        else {
-            res.write(data);
-        }
-
-        res.end();
-    });
-});
-
-app.get("/*?.jpg", (req, res) => {
-    res.writeHead(200, {'Content-Type':'image/jpeg'})
-    let file=__dirname + req.url;
-    fs.readFile(file,function(error, data){
         if(error){
             res.writeHead(404);
             res.write('page not found');
