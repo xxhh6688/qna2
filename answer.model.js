@@ -9,15 +9,21 @@ Answer.checkDuplicate = (content, result) => {
     searchStr = searchStr.replace(/'/g, "\'");
     let sqlStr = `SELECT id, content, MATCH(answer_search) AGAINST('${searchStr}') AS score FROM answer WHERE MATCH(answer_search) AGAINST('${searchStr}')`;
 
-    sql.query(sqlStr, (err, res) => {
-        if (err) {
-            console.log("error: ", err);
-            result(err, null);
-            return;
-        }
+    try {
+        sql.query(sqlStr, (err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                result(err, null);
+                return;
+            }
 
-        result(null, res);
-    });
+            result(null, res);
+        });
+    }
+    catch (error) {
+        console.log(err);
+        result(error, {});
+    }
 };
 
 Answer.rememberContent = (content, result) => {
@@ -26,15 +32,21 @@ Answer.rememberContent = (content, result) => {
     content = content.replace(/'/g, "\'");
     let sqlStr = `insert into answer (content,answer_search,createtime) values ('${content}', '${searchStr}',UNIX_TIMESTAMP())`;
 
-    sql.query(sqlStr, (err, res) => {
-        if (err) {
-            console.log("error: ", err);
-            result(err, null);
-            return;
-        }
+    try {
+        sql.query(sqlStr, (err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                result(err, null);
+                return;
+            }
 
-        result(null, {});
-    });
+            result(null, {});
+        });
+    }
+    catch (error) {
+        result(error, {});
+    }
+    
 };
 
 Answer.updateContent = (id, content, result) => {
@@ -43,29 +55,40 @@ Answer.updateContent = (id, content, result) => {
     content = content.replace(/'/g, "\'");
     let sqlStr = `update answer set content='${content}', answer_search='${searchStr}' where id=${id}`;
 
-    sql.query(sqlStr, (err, res) => {
-        if (err) {
-            console.log("error: ", err);
-            result(err, null);
-            return;
-        }
+    try {
+        sql.query(sqlStr, (err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                result(err, null);
+                return;
+            }
 
-        result(null, {});
-    });
+            result(null, {});
+        });
+    }
+    catch (error) {
+        result(error, {});
+    }
 };
 
 Answer.deleteContent = (id, result) => {
     let sqlStr = `delete from answer where id=${id}`;
 
-    sql.query(sqlStr, (err, res) => {
-        if (err) {
-            console.log("error: ", err);
-            result(err, null);
-            return;
-        }
+    try {
+        sql.query(sqlStr, (err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                result(err, null);
+                return;
+            }
 
-        result(null, {});
-    });
+            result(null, {});
+        });
+    }
+    catch (error) {
+        result(error, {});
+    }
+    
 };
 
 function EncodeString(content)
