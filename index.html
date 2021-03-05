@@ -473,10 +473,7 @@
                     id: id
                 }),
                 success: function (data) {
-                    if (data.length == 0) {
-                        createMessage("收到", 'l');
-                        return;
-                    }
+                    createMessage("收到", 'l');
                 },
                 error: function (error) {
                 },
