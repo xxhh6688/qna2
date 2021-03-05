@@ -462,6 +462,10 @@
         }
 
         function deleteContent(id) {
+            if(!confirm("are you sure?")){
+                return;
+            }
+            
             $.ajax({
                 url: "/deletecontent",
                 method: "post",
@@ -473,8 +477,6 @@
                         createMessage("收到", 'l');
                         return;
                     }
-
-                    createMessage("收到", 'l');
                 },
                 error: function (error) {
                 },

@@ -6,7 +6,7 @@ const Answer = function () {
 
 Answer.checkDuplicate = (content, result) => {
     let searchStr = EncodeString(content.toString());
-    searchStr = searchStr.replace(/'/g, "\'");
+    searchStr = searchStr.replace(/'/g, "\\'");
     let sqlStr = `SELECT id, content, MATCH(answer_search) AGAINST('${searchStr}') AS score FROM answer WHERE MATCH(answer_search) AGAINST('${searchStr}')`;
 
     try {
@@ -28,8 +28,8 @@ Answer.checkDuplicate = (content, result) => {
 
 Answer.rememberContent = (content, result) => {
     let searchStr = EncodeString(content.toString());
-    searchStr = searchStr.replace(/'/g, "\'");
-    content = content.replace(/'/g, "\'");
+    searchStr = searchStr.replace(/'/g, "\\'");
+    content = content.replace(/'/g, "\\'");
     let sqlStr = `insert into answer (content,answer_search,createtime) values ('${content}', '${searchStr}',UNIX_TIMESTAMP())`;
 
     try {
@@ -51,8 +51,8 @@ Answer.rememberContent = (content, result) => {
 
 Answer.updateContent = (id, content, result) => {
     let searchStr = EncodeString(content.toString());
-    searchStr = searchStr.replace(/'/g, "\'");
-    content = content.replace(/'/g, "\'");
+    searchStr = searchStr.replace(/'/g, "\\'");
+    content = content.replace(/'/g, "\\'");
     let sqlStr = `update answer set content='${content}', answer_search='${searchStr}' where id=${id}`;
 
     try {
